@@ -23,15 +23,6 @@ func TestPrompt(t *testing.T) {
 	}
 }
 
-// TestStubs проверяет, что заглушки выводят имя команды и аргументы.
-func TestStubs(t *testing.T) {
-	sh, out, _ := newShell()
-	sh.Execute("ls -a dir")
-	if !strings.Contains(out.String(), `ls: args ["-a" "dir"]`) {
-		t.Errorf("unexpected output %q", out.String())
-	}
-}
-
 // TestUnknownCommand проверяет сообщение о неизвестной команде.
 func TestUnknownCommand(t *testing.T) {
 	sh, _, errOut := newShell()
@@ -61,11 +52,11 @@ func TestExit(t *testing.T) {
 // TestRun проверяет работу REPL до команды exit.
 func TestRun(t *testing.T) {
 	sh, out, _ := newShell()
-	code := sh.Run(strings.NewReader("cd /tmp\nexit 5\nls\n"))
+	code := sh.Run(strings.NewReader("whoami\nexit 5\nls\n"))
 	if code != 5 {
 		t.Errorf("Run returned %d, want 5", code)
 	}
-	if strings.Contains(out.String(), "ls: args") {
+	if strings.Count(out.String(), "$ ") != 2 {
 		t.Error("commands after exit must not run")
 	}
 }

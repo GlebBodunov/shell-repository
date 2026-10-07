@@ -6,11 +6,8 @@ import (
 	"strconv"
 )
 
-// Ограничения на число аргументов команд.
-const (
-	maxExitArgs = 1
-	maxSaveArgs = 1
-)
+// singleOperand — число операндов у команд, принимающих один аргумент.
+const singleOperand = 1
 
 // Ошибки проверки аргументов команд.
 var (
@@ -21,24 +18,19 @@ var (
 // defaultCommands возвращает таблицу встроенных команд оболочки.
 func defaultCommands() map[string]handler {
 	return map[string]handler{
-		"ls":       stub("ls"),
-		"cd":       stub("cd"),
+		"ls":       cmdLs,
+		"cd":       cmdCd,
+		"rev":      cmdRev,
+		"wc":       cmdWc,
+		"whoami":   cmdWhoami,
 		"exit":     cmdExit,
 		"vfs-save": cmdVfsSave,
 	}
 }
 
-// stub создаёт команду-заглушку, которая выводит своё имя и аргументы.
-func stub(name string) handler {
-	return func(s *Shell, args []string) error {
-		fmt.Fprintf(s.out, "%s: args %q\n", name, args)
-		return nil
-	}
-}
-
 // cmdExit завершает работу оболочки с необязательным числовым кодом.
 func cmdExit(_ *Shell, args []string) error {
-	if len(args) > maxExitArgs {
+	if len(args) > singleOperand {
 		return errTooManyArgs
 	}
 	if len(args) == 0 {
@@ -56,7 +48,7 @@ func cmdVfsSave(s *Shell, args []string) error {
 	if len(args) == 0 {
 		return errMissingOperand
 	}
-	if len(args) > maxSaveArgs {
+	if len(args) > singleOperand {
 		return errTooManyArgs
 	}
 	if err := s.fs.Save(args[0]); err != nil {

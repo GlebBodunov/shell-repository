@@ -21,12 +21,12 @@ func TestStripComments(t *testing.T) {
 // TestRunScript проверяет вывод команд скрипта и остановку на exit.
 func TestRunScript(t *testing.T) {
 	sh, out, _ := newShell()
-	done, code, err := sh.RunScript(strings.NewReader("ls a\nexit 4\ncd b\n"))
+	done, code, err := sh.RunScript(strings.NewReader("whoami\nexit 4\ncd b\n"))
 	if err != nil || !done || code != 4 {
 		t.Fatalf("RunScript = (%v, %d, %v)", done, code, err)
 	}
 	text := out.String()
-	if !strings.Contains(text, "$ ls a\n") || strings.Contains(text, "cd b") {
+	if !strings.Contains(text, "$ whoami\n") || strings.Contains(text, "cd b") {
 		t.Errorf("unexpected script output %q", text)
 	}
 }
