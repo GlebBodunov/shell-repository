@@ -1,0 +1,31 @@
+// Стартовый скрипт этапа 5: команда rm (изменения только в памяти).
+
+// Удаление файла.
+ls etc
+rm etc/config.cfg
+ls etc
+
+// Удаление нескольких файлов и рекурсивное удаление директории.
+ls -l home/user/docs
+rm home/user/docs/report.txt home/user/music/playlist.txt
+rm -r home/user/docs/drafts
+ls home/user/docs home/user/music
+
+// rm -f не сообщает об отсутствующих файлах.
+rm -f no_such_file.txt
+
+// Ошибки rm.
+rm
+rm var
+rm no_such_file.txt
+rm -x var
+rm -r /
+cd var/log
+rm -r /var
+cd
+
+// Состояние VFS после удалений сохраняется на диск.
+rm -R var
+ls
+vfs-save saved_vfs/stage5
+exit

@@ -25,6 +25,7 @@ var (
 	ErrIsDir      = errors.New("is a directory")
 	ErrExist      = errors.New("file exists")
 	ErrSourceType = errors.New("VFS source must be a directory")
+	ErrRoot       = errors.New("cannot remove the root directory")
 )
 
 // Node — файл или директория VFS.
@@ -107,6 +108,32 @@ func (f *FS) Stats() (dirs, files int) {
 	}
 	walk(f.root)
 	return dirs, files
+}
+
+// Remove удаляет файл или директорию по абсолютному пути VFS.
+// Директория удаляется только при recursive, равном true.
+// Изменения выполняются только в памяти.
+func (f *FS) Remove(p string, recursive bool) error {
+	p = path.Clean("/" + p)
+	if p == "/" {
+		return ErrRoot
+	}
+	parent, err := f.Lookup(path.Dir(p))
+	if err != nil {
+		return err
+	}
+	if !parent.IsDir {
+		return ErrNotDir
+	}
+	node, ok := parent.children[path.Base(p)]
+	if !ok {
+		return ErrNotExist
+	}
+	if node.IsDir && !recursive {
+		return ErrIsDir
+	}
+	delete(parent.children, node.Name)
+	return nil
 }
 
 // splitPath разбивает абсолютный путь на имена компонентов.

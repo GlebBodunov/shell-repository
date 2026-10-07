@@ -89,3 +89,25 @@ func TestWhoami(t *testing.T) {
 		t.Errorf("whoami output %q, errors %q", out, errOut)
 	}
 }
+
+// TestRm проверяет удаление файлов и директорий в памяти.
+func TestRm(t *testing.T) {
+	sh, out, errOut := newDeepShell(t)
+	for _, line := range []string{
+		"rm etc/config.cfg", "rm var", "rm -r var", "rm -f missing",
+		"rm missing", "rm -r /", "cd home/user", "rm -r /home", "cd", "ls",
+	} {
+		sh.Execute(line)
+	}
+	if got := out.String(); got != "etc/\nhome/\n" {
+		t.Errorf("ls after rm = %q", got)
+	}
+	for _, want := range []string{"is a directory", "no such file", "root", "current directory"} {
+		if !strings.Contains(errOut.String(), want) {
+			t.Errorf("rm errors %q do not contain %q", errOut.String(), want)
+		}
+	}
+	if strings.Count(errOut.String(), "\n") != 4 {
+		t.Errorf("unexpected number of rm errors: %q", errOut.String())
+	}
+}

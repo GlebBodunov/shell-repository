@@ -23,6 +23,7 @@ func defaultCommands() map[string]handler {
 		"rev":      cmdRev,
 		"wc":       cmdWc,
 		"whoami":   cmdWhoami,
+		"rm":       cmdRm,
 		"exit":     cmdExit,
 		"vfs-save": cmdVfsSave,
 	}
