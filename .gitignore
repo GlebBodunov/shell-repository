@@ -1,0 +1,15 @@
+# Артефакты сборки
+bin/
+*.exe
+*.test
+*.out
+coverage.*
+
+# Настройки редакторов и ОС
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Результаты vfs-save из тестовых запусков
+saved_vfs/
