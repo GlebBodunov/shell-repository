@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/user"
 	"strings"
+
+	"shellemu/src/vfs"
 )
 
 // handler — функция, реализующая команду оболочки.
@@ -31,11 +33,17 @@ type Shell struct {
 	host     string
 	lookup   func(string) string
 	commands map[string]handler
+	fs       *vfs.FS
+	cwd      string
 }
 
-// New создаёт оболочку, которая пишет обычный вывод в out, а ошибки в errOut.
-// Имя пользователя и имя компьютера берутся из реальной ОС.
-func New(out, errOut io.Writer) *Shell {
+// New создаёт оболочку, которая работает с виртуальной файловой системой
+// fsys и пишет обычный вывод в out, а ошибки в errOut. Если fsys равна nil,
+// используется пустая VFS. Имя пользователя и компьютера берутся из ОС.
+func New(out, errOut io.Writer, fsys *vfs.FS) *Shell {
+	if fsys == nil {
+		fsys = vfs.New()
+	}
 	return &Shell{
 		out:      out,
 		errOut:   errOut,
@@ -43,12 +51,23 @@ func New(out, errOut io.Writer) *Shell {
 		host:     currentHost(),
 		lookup:   os.Getenv,
 		commands: defaultCommands(),
+		fs:       fsys,
+		cwd:      "/",
 	}
 }
 
-// Prompt возвращает приглашение к вводу в формате username@hostname:~$.
+// Prompt возвращает приглашение к вводу в формате username@hostname:путь$.
+// Корень VFS отображается как ~.
 func (s *Shell) Prompt() string {
-	return fmt.Sprintf("%s@%s:~$ ", s.user, s.host)
+	return fmt.Sprintf("%s@%s:%s$ ", s.user, s.host, displayPath(s.cwd))
+}
+
+// displayPath возвращает путь VFS для приглашения, заменяя корень на ~.
+func displayPath(p string) string {
+	if p == "/" {
+		return "~"
+	}
+	return "~" + p
 }
 
 // Execute выполняет одну строку команды. Возвращает true и код завершения,

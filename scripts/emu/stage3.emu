@@ -1,0 +1,22 @@
+// Стартовый скрипт этапа 3: все команды этапов 1–3.
+
+// Раскрытие переменных окружения реальной ОС и кавычки.
+ls $HOME
+cd "${HOME}/my dir" 'no $expansion'
+ls a\ b
+
+// Обработка ошибок разбора и неизвестных команд.
+ls "unterminated
+cd ${BROKEN
+unknown-command arg
+
+/* vfs-save: ошибки аргументов и успешное сохранение */
+vfs-save
+vfs-save one two
+vfs-save saved_vfs/stage3
+vfs-save saved_vfs/stage3
+
+// Ошибки команды exit, затем выход.
+exit not-a-number
+exit 1 2
+exit 0

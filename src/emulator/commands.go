@@ -6,18 +6,25 @@ import (
 	"strconv"
 )
 
-// maxExitArgs — максимальное число аргументов команды exit.
-const maxExitArgs = 1
+// Ограничения на число аргументов команд.
+const (
+	maxExitArgs = 1
+	maxSaveArgs = 1
+)
 
-// errTooManyArgs возвращается, если команде передано слишком много аргументов.
-var errTooManyArgs = errors.New("too many arguments")
+// Ошибки проверки аргументов команд.
+var (
+	errTooManyArgs    = errors.New("too many arguments")
+	errMissingOperand = errors.New("missing operand")
+)
 
 // defaultCommands возвращает таблицу встроенных команд оболочки.
 func defaultCommands() map[string]handler {
 	return map[string]handler{
-		"ls":   stub("ls"),
-		"cd":   stub("cd"),
-		"exit": cmdExit,
+		"ls":       stub("ls"),
+		"cd":       stub("cd"),
+		"exit":     cmdExit,
+		"vfs-save": cmdVfsSave,
 	}
 }
 
@@ -42,4 +49,19 @@ func cmdExit(_ *Shell, args []string) error {
 		return fmt.Errorf("%s: numeric argument required", args[0])
 	}
 	return exitRequest{code: code}
+}
+
+// cmdVfsSave сохраняет текущее состояние VFS на диск в виде директории.
+func cmdVfsSave(s *Shell, args []string) error {
+	if len(args) == 0 {
+		return errMissingOperand
+	}
+	if len(args) > maxSaveArgs {
+		return errTooManyArgs
+	}
+	if err := s.fs.Save(args[0]); err != nil {
+		return fmt.Errorf("%s: %w", args[0], err)
+	}
+	fmt.Fprintf(s.out, "VFS saved to %s\n", args[0])
+	return nil
 }

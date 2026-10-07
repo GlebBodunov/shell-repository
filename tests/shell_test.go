@@ -11,7 +11,7 @@ import (
 // newShell создаёт оболочку с буферами для вывода и ошибок.
 func newShell() (*emulator.Shell, *bytes.Buffer, *bytes.Buffer) {
 	var out, errOut bytes.Buffer
-	return emulator.New(&out, &errOut), &out, &errOut
+	return emulator.New(&out, &errOut, nil), &out, &errOut
 }
 
 // TestPrompt проверяет формат приглашения username@hostname:~$.
@@ -67,5 +67,16 @@ func TestRun(t *testing.T) {
 	}
 	if strings.Contains(out.String(), "ls: args") {
 		t.Error("commands after exit must not run")
+	}
+}
+
+// TestVfsSaveErrors проверяет обработку ошибок команды vfs-save.
+func TestVfsSaveErrors(t *testing.T) {
+	sh, _, errOut := newShell()
+	sh.Execute("vfs-save")
+	sh.Execute("vfs-save a b")
+	text := errOut.String()
+	if !strings.Contains(text, "missing operand") || !strings.Contains(text, "too many") {
+		t.Errorf("unexpected error output %q", text)
 	}
 }
